@@ -1,0 +1,17 @@
+services:
+  app:
+    build: .
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    depends_on:
+      - db
+    command: python3 main.py
+
+  db:
+    image: postgres:15-alpine
+    volumes:
+      - .database/data:/var/lib/postgresql/data
+    env_file:
+      - .env
