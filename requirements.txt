@@ -1,9 +1,6 @@
 sqlalchemy[asyncio]
-uvloop
-ujson
-#cchardet - not compile for python3.11
-aiodns
-aiohttp[speedups]
-aiogram
-asyncpg
+pyrogram
+tgcrypto
 pydantic
+asyncpg
+

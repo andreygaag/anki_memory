@@ -1,95 +1,72 @@
 import logging
 import os
-from aiogram import Bot, Dispatcher, types, executor
-from aiogram.contrib.fsm_storage.memory import MemoryStorage
-from aiogram.dispatcher import FSMContext
-from aiogram.dispatcher.filters.state import StatesGroup, State
 
-from tg_bot import aiogram_monkey
-from tg_bot.keyboards import InlineKeyboards
+from pyrogram.types import ReplyKeyboardMarkup
 
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
+from pyrogram import Client, filters
 
-bot = Bot(os.getenv("TELEGRAM_BOT_TOKEN"))
-storage = MemoryStorage()
-dp = Dispatcher(bot, storage=storage)
+bot = Client(
+    "anki_memory",
+    api_id=int(os.environ["TG_API_ID"]),
+    api_hash=os.environ["TG_API_HASH"],
+)
 
-class AddCardForm(StatesGroup):
-    wait_side_1 = State()
-    wait_side_2 = State()
+state = 0
+cached_data = {}
+WAIT_SIDE_1 = 1
+WAIT_SIDE_2 = 2
 
-
-
-
-class TelegramBot:
-
-    anki = None
-
-    @classmethod
-    async def create(cls, anki):
-        self = TelegramBot()
-        TelegramBot.anki = anki
-
-        # monkey patch
-        executor.Executor = aiogram_monkey.MyExecutor
-        executor.start_polling = aiogram_monkey.start_polling
-
-        TelegramBot.keyboards = InlineKeyboards()
-        await executor.start_polling(dp, skip_updates=True)
-
-        logging.info("Initializing TelegramBot")
-        return self
-
-    @dp.message_handler(commands=['start'], state="*")
-    async def process_start_command(message: types.Message):
-        await message.reply(
+@bot.on_message(filters.text & filters.private)
+async def echo(client, message):
+    await message.reply(message.text)
+@bot.on_message(filters.command("start"))
+async def process_start_command(client, message):
+    async with bot:
+        await bot.send_message(
+            message.chat.id,
             "Привет!\nЯ - Бот, помогает закрепить знания в памяти методом карточек Anki.\n",
-            reply_markup=TelegramBot.keyboards.main_menu,
+            reply_markup=ReplyKeyboardMarkup(
+                [
+                    ["Добавить карточку"],
+                    ["Случайная карточка"],
+                ],
+                resize_keyboard=True,
+            )
         )
 
-    @dp.callback_query_handler(text="add_card")
-    @dp.message_handler(commands=['add_card'], state="*")
-    async def process_add_card_command(message: types.Message | types.CallbackQuery):
-        chat_id = message.chat.id if type(message) == types.Message else message.message.chat.id
-        await AddCardForm.wait_side_1.set()
-        await bot.send_message(chat_id, "Введите первую сторону карточки")
+@bot.on_callback_query(filters.regex("add_card"))
+async def process_add_card_command(client, callback_query):
+    #await AddCardForm.wait_side_1.set()
+    state = WAIT_SIDE_1
+    await callback_query.answer("Введите первую сторону карточки")
 
-
-    @dp.message_handler(state=AddCardForm.wait_side_1)
-    async def process_side_1(message: types.Message, state: FSMContext):
-        async with state.proxy() as data:
-            data['side_1'] = message.message_id
-            await AddCardForm.next()
-            await message.answer("Введите вторую сторону карточки")
-
-    @dp.message_handler(state=AddCardForm.wait_side_2)
-    async def process_side_2(message: types.Message, state: FSMContext):
-        async with state.proxy() as data:
-            data['side_2'] = message.message_id
+@bot.on_message()
+async def process_message(client, message):
+    if state == WAIT_SIDE_1:
+        cached_data['side_1'] = message.message_id
+        state = WAIT_SIDE_2
+        await message.answer("Введите вторую сторону карточки")
+    elif state == WAIT_SIDE_2:
+        cached_data['side_2'] = message.message_id
         # save card in anki layer
-        await TelegramBot.anki.create_card(data['side_1'], data['side_2'])
-        await message.answer(f"Карточка создана {data['side_1']} {data['side_2']} {TelegramBot.anki}")
-        await state.finish()
+        #await anki.create_card(cached_data['side_1'], cached_data['side_2'])
+        await message.answer(f"Карточка создана {cached_data['side_1']} {cached_data['side_2']}")
+        state = 0
+    else:
+        await message.reply("Неизвестная команда")
 
-    @dp.callback_query_handler(text="random_card")
-    @dp.message_handler(commands=['random_card'])
-    async def process_random_card_command(message: types.Message):
-        side_1_id, side_2_id = await TelegramBot.anki.random_card()
-
-        chat_id = message.chat.id if type(message) == types.Message else message.message.chat.id
-        chat = await bot.get_chat(chat_id)
-        await bot.send_message(chat_id, f"Сторона 1:")
-        await bot.forward_message(chat_id=chat_id, from_chat_id=chat_id, message_id=side_1_id)
-        await bot.send_message(chat_id, f"Сторона 2:")
-        await bot.forward_message(chat_id=chat_id, from_chat_id=chat_id, message_id=side_2_id,)
-
-        await message.answer(f"Карточка {card}")
-        await bot
-
-    # @dp.message_handler()
-    async def echo_message(msg: types.Message):
-        await msg.answer(msg.text)
+@bot.on_callback_query(filters.regex("random_card"))
+async def process_random_card_command(client, callback_query):
+    side_1_id, side_2_id = 1,2 # await TelegramBot.anki.random_card()
+    async with bot:
+        async for message in bot.iter_history("me"):
+            if message.message_id == side_1_id:
+                await callback_query.answer(message.text)
+            if message.message_id == side_2_id:
+                await callback_query.answer(message.text)
+bot.run()

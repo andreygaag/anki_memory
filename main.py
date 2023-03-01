@@ -4,8 +4,6 @@ import os
 import sys
 from asyncio import Future
 
-import uvloop
-
 from anki import Anki
 from database import Database
 from tg_bot import TelegramBot
@@ -34,9 +32,4 @@ async def main():
     anki_memory_app = await AnkiMemoryApp.create()
 
 if __name__ == "__main__":
-    if sys.version_info >= (3, 11):
-        with asyncio.Runner(loop_factory=uvloop.new_event_loop) as runner:
-            runner.run(main())
-    else:
-        uvloop.install()
-        asyncio.run(main())
+    asyncio.run(main())
