@@ -8,7 +8,7 @@ import uvloop
 
 from anki import Anki
 from database import Database
-from tg_bot import TelegramBot
+from tg_bot import Bot
 
 
 class AnkiMemoryApp:
@@ -25,7 +25,7 @@ class AnkiMemoryApp:
             db_name=os.getenv("POSTGRES_DB"),
         )
         self.anki = Anki(self.database)
-        self.bot = await TelegramBot.create(self.anki)
+        self.bot = await Bot.create(self.anki)
         self.logger.info("AnkiMemory telegram app")
         return self
 
