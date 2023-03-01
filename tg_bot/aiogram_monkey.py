@@ -33,7 +33,7 @@ class MyExecutor(executor.Executor):
                         relax=relax,
                         fast=fast,
                         allowed_updates=allowed_updates,
-                    )
+                    ),
                 )
                 await Future()
             except (KeyboardInterrupt, SystemExit):
@@ -50,7 +50,7 @@ class MyExecutor(executor.Executor):
                         relax=relax,
                         fast=fast,
                         allowed_updates=allowed_updates,
-                    )
+                    ),
                 )
                 loop.run_forever()
             except (KeyboardInterrupt, SystemExit):
@@ -58,7 +58,7 @@ class MyExecutor(executor.Executor):
                 pass
             finally:
                 loop.run_until_complete(self._shutdown_polling())
-                log.warning("Goodbye!")
+                log.warning("Goodbye!")  # type: ignore
 
 
 async def start_polling(

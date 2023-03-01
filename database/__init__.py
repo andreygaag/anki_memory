@@ -2,18 +2,24 @@
 import logging
 import time
 
-from sqlalchemy import (
-    MetaData,
-    select,
-    insert,
-    update,
-)
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
+from sqlalchemy import insert
+from sqlalchemy import MetaData
+from sqlalchemy import select
+from sqlalchemy import update
+from sqlalchemy.ext.asyncio import async_sessionmaker
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.ext.asyncio import create_async_engine
 
-from database.tables import Base, AnkiCardsTable
+from database.tables import AnkiCardsTable
+from database.tables import Base
 
 
 class Database:
+    def __init__(self):
+        self.engine = None
+        self.session = None
+        self.logger = None
+
     @classmethod
     async def create(cls, host: str, user: str, password: str, db_name: str):
         self = Database()
@@ -36,15 +42,17 @@ class Database:
         async with self.session() as session:
             async with session.begin():
                 result = await session.execute(
-                    select(AnkiCardsTable).order_by(AnkiCardsTable.create_time)
+                    select(AnkiCardsTable).order_by(
+                        AnkiCardsTable.create_time,
+                    ),
                 )
                 return result.scalars().all()
 
-    async def get_card(self, card_id: int = None):
+    async def get_card(self, card_id: int):
         async with self.session() as session:
             async with session.begin():
                 result = await session.execute(
-                    select(AnkiCardsTable).where(AnkiCardsTable.id == card_id)
+                    select(AnkiCardsTable).where(AnkiCardsTable.id == card_id),
                 )
                 return result.scalars().first()
 
@@ -60,7 +68,7 @@ class Database:
                         no=card.no,
                         show_time=card.show_time,
                         create_time=card.create_time,
-                    )
+                    ),
                 )
 
     async def update_card(self, card):

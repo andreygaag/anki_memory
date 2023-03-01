@@ -1,7 +1,8 @@
 from typing import Optional
 
-from sqlalchemy.orm import DeclarativeBase, MappedColumn
+from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.orm import Mapped
+from sqlalchemy.orm import MappedColumn
 
 
 class Base(DeclarativeBase):

@@ -6,9 +6,9 @@ from asyncio import Future
 
 import uvloop
 
-from anki import Anki
+from anki import AnkiMemApp
 from database import Database
-from tg_bot import Bot
+from tg_bot import AnkiMemBot
 
 
 class AnkiMemoryApp:
@@ -23,8 +23,8 @@ class AnkiMemoryApp:
             password=os.getenv("POSTGRES_PASSWORD"),
             db_name=os.getenv("POSTGRES_DB"),
         )
-        self.anki = Anki(self.database)
-        self.bot = await Bot.create(self.anki)
+        self.anki = AnkiMemApp(self.database)
+        self.bot = await AnkiMemBot.create(self.anki)
         self.logger.info("AnkiMemory telegram app")
         return self
 

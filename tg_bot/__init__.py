@@ -1,1 +1,1 @@
-from .aiogram_bot import Bot
+from .aiogram_bot import AnkiMemBot

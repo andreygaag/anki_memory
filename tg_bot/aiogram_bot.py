@@ -1,16 +1,25 @@
 import logging
 import os
-from aiogram import Bot, Dispatcher, types, executor
+
+from aiogram import Bot
+from aiogram import Dispatcher
+from aiogram import executor
+from aiogram import types
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.dispatcher import FSMContext
 from aiogram.types import ContentTypes
 
+from anki import AnkiMemApp
 from tg_bot import aiogram_monkey
-from tg_bot.forms import AddCardForm, ShowCardForm
-from tg_bot.ui import MainMenu, ShowCardMenu
+from tg_bot.forms import AddCardForm
+from tg_bot.forms import ShowCardForm
+from tg_bot.ui import MainMenu
+from tg_bot.ui import Menu
+from tg_bot.ui import ShowCardMenu
 
 logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
 logger = logging.getLogger(__name__)
 
@@ -19,16 +28,16 @@ storage = MemoryStorage()
 dp = Dispatcher(bot, storage=storage)
 
 
-class Bot:
+class AnkiMemBot:
 
-    anki = None
-    main_menu = MainMenu()
-    show_card_menu = ShowCardMenu()
+    anki: AnkiMemApp
+    main_menu: Menu = MainMenu()
+    show_card_menu: Menu = ShowCardMenu()
 
     @classmethod
     async def create(cls, anki):
-        self = Bot()
-        Bot.anki = anki
+        self = AnkiMemBot()
+        AnkiMemBot.anki = anki
 
         # monkey patch
         executor.Executor = aiogram_monkey.MyExecutor
@@ -47,14 +56,17 @@ class Bot:
 async def process_start_command(message: types.Message):
     await message.reply(
         "Привет!\nЯ - Бот, помогает закрепить знания в памяти методом карточек Anki.\n",
-        reply_markup=Bot.main_menu.keyboard,
+        reply_markup=AnkiMemBot.main_menu.keyboard,
     )
 
 
 @dp.message_handler(text=MainMenu.MENU)
 async def return_to_main_menu(message: types.Message, state: FSMContext):
     await state.finish()
-    await message.answer("Выберите действие", reply_markup=Bot.main_menu.keyboard)
+    await message.answer(
+        "Выберите действие",
+        reply_markup=AnkiMemBot.main_menu.keyboard,
+    )
 
 
 """ Add card flow """
@@ -67,7 +79,8 @@ async def process_add_card_command(message: types.Message):
 
 
 @dp.message_handler(
-    state=AddCardForm.wait_side_1, content_types=ContentTypes.TEXT | ContentTypes.PHOTO
+    state=AddCardForm.wait_side_1,
+    content_types=ContentTypes.TEXT | ContentTypes.PHOTO,
 )
 async def process_side_1(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
@@ -77,14 +90,15 @@ async def process_side_1(message: types.Message, state: FSMContext):
 
 
 @dp.message_handler(
-    state=AddCardForm.wait_side_2, content_types=ContentTypes.TEXT | ContentTypes.PHOTO
+    state=AddCardForm.wait_side_2,
+    content_types=ContentTypes.TEXT | ContentTypes.PHOTO,
 )
 async def process_side_2(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         data["side_2"] = message.message_id
-        await Bot.anki.create_card(data["side_1"], data["side_2"])
+        await AnkiMemBot.anki.create_card(data["side_1"], data["side_2"])
         await message.answer(
-            f"Карточка создана {data['side_1']} {data['side_2']} {Bot.anki}"
+            f"Карточка создана {data['side_1']} {data['side_2']} {AnkiMemBot.anki}",
         )
     await state.finish()
 
@@ -96,11 +110,14 @@ async def process_side_2(message: types.Message, state: FSMContext):
 @dp.message_handler(text=ShowCardMenu.BTN_SHOW_NEXT_RANDOM)
 async def process_random_card_command(message: types.Message, state: FSMContext):
     ShowCardForm.show_card.set()
-    side_1_id, side_2_id = await Bot.anki.random_card()
+    side_1_id, side_2_id = await AnkiMemBot.anki.random_card()
     async with state.proxy() as data:
         data["side_1_id"] = side_1_id
         data["side_2_id"] = side_2_id
-    await message.answer(f"Что показать?", reply_markup=Bot.show_card_menu.keyboard)
+    await message.answer(
+        f"Что показать?",
+        reply_markup=AnkiMemBot.show_card_menu.keyboard,
+    )
 
 
 @dp.message_handler(text=ShowCardMenu.BTN_SHOW_SIDE_1)
