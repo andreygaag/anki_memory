@@ -1,10 +1,7 @@
 from aiogram.types import ReplyKeyboardMarkup
 
 
-class MainMenu:
-    BTN_ADD = ("Добавить карточку",)
-    BTN_RANDOM = ("Случайная карточка",)
-
+class Menu:
     def __init__(self):
         self._keyboard = ReplyKeyboardMarkup()
         self._keyboard.add(*self._get_buttons_text_from_classfields())
@@ -19,3 +16,8 @@ class MainMenu:
     @property
     def keyboard(self):
         return self._keyboard
+
+
+class MainMenu(Menu):
+    BTN_ADD = ("Добавить карточку",)
+    BTN_RANDOM = ("Случайная карточка",)
