@@ -14,7 +14,6 @@ from database.tables import Base, AnkiCardsTable
 
 
 class Database:
-
     @classmethod
     async def create(cls, host: str, user: str, password: str, db_name: str):
         self = Database()

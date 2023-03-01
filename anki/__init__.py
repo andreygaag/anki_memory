@@ -42,4 +42,3 @@ class Anki:
     async def update_card(self, card: AnkiCard):
         self.logger.info("Updating card")
         return await self.db.update_card(card)
-

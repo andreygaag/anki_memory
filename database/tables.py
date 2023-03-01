@@ -7,8 +7,9 @@ from sqlalchemy.orm import Mapped
 class Base(DeclarativeBase):
     pass
 
+
 class AnkiCardsTable(Base):
-    __tablename__ = 'anki_cards'
+    __tablename__ = "anki_cards"
     id: Mapped[int] = MappedColumn(primary_key=True)
     side_1_msg: Mapped[int]
     side_2_msg: Mapped[int]
