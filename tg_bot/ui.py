@@ -8,9 +8,7 @@ class Menu:
 
     def _get_buttons_text_from_classfields(self):
         return [
-            item[1][0]
-            for item in MainMenu.__dict__.items()
-            if item[0].startswith("BTN_")
+            item[1] for item in MainMenu.__dict__.items() if item[0].startswith("BTN_")
         ]
 
     @property
@@ -19,5 +17,12 @@ class Menu:
 
 
 class MainMenu(Menu):
-    BTN_ADD = ("Добавить карточку",)
-    BTN_RANDOM = ("Случайная карточка",)
+    BTN_ADD = "Добавить карточку"
+    BTN_RANDOM = "Случайная карточка"
+    MENU = "В главное меню"
+
+
+class ShowSide(Menu):
+    BTN_SHOW_SIDE_1 = "Показать сторону 1"
+    BTN_SHOW_SIDE_2 = "Показать сторону 2"
+    BTN_MAIN_MENU = MainMenu.MENU
