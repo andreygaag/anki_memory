@@ -6,8 +6,8 @@ from aiogram.dispatcher import FSMContext
 from aiogram.types import ContentTypes
 
 from tg_bot import aiogram_monkey
-from tg_bot.forms import AddCardForm
-from tg_bot.ui import MainMenu
+from tg_bot.forms import AddCardForm, ShowCardForm
+from tg_bot.ui import MainMenu, ShowCardMenu
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -23,6 +23,7 @@ class Bot:
 
     anki = None
     main_menu = MainMenu()
+    show_card_menu = ShowCardMenu()
 
     @classmethod
     async def create(cls, anki):
@@ -39,7 +40,7 @@ class Bot:
         return self
 
 
-""" Message handlers """
+""" Main menu """
 
 
 @dp.message_handler(commands=["start"], state="*")
@@ -48,6 +49,21 @@ async def process_start_command(message: types.Message):
         "Привет!\nЯ - Бот, помогает закрепить знания в памяти методом карточек Anki.\n",
         reply_markup=Bot.main_menu.keyboard,
     )
+
+
+@dp.message_handler(text=MainMenu.MENU)
+async def return_to_main_menu(message: types.Message, state: FSMContext):
+    await state.finish()
+    await message.answer("Выберите действие", reply_markup=Bot.main_menu.keyboard)
+
+
+""" Add card flow """
+
+
+@dp.message_handler(text=MainMenu.BTN_ADD)
+async def process_add_card_command(message: types.Message):
+    await AddCardForm.wait_side_1.set()
+    await message.answer("Введите первую сторону карточки")
 
 
 @dp.message_handler(
@@ -66,33 +82,37 @@ async def process_side_1(message: types.Message, state: FSMContext):
 async def process_side_2(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         data["side_2"] = message.message_id
-    await Bot.anki.create_card(data["side_1"], data["side_2"])
-    await message.answer(
-        f"Карточка создана {data['side_1']} {data['side_2']} {Bot.anki}"
-    )
+        await Bot.anki.create_card(data["side_1"], data["side_2"])
+        await message.answer(
+            f"Карточка создана {data['side_1']} {data['side_2']} {Bot.anki}"
+        )
     await state.finish()
 
 
+""" Show random card flow """
+
+
 @dp.message_handler(text=MainMenu.BTN_RANDOM)
-async def process_random_card_command(message: types.Message):
+@dp.message_handler(text=ShowCardMenu.BTN_SHOW_NEXT_RANDOM)
+async def process_random_card_command(message: types.Message, state: FSMContext):
+    ShowCardForm.show_card.set()
     side_1_id, side_2_id = await Bot.anki.random_card()
-
-    chat_id = (
-        message.chat.id if type(message) == types.Message else message.message.chat.id
-    )
-    await message.answer(f"Сторона 1:")
-    await bot.forward_message(
-        chat_id=chat_id, from_chat_id=chat_id, message_id=side_1_id
-    )
-    await message.answer(f"Сторона 2:")
-    await bot.forward_message(
-        chat_id=chat_id,
-        from_chat_id=chat_id,
-        message_id=side_2_id,
-    )
+    async with state.proxy() as data:
+        data["side_1_id"] = side_1_id
+        data["side_2_id"] = side_2_id
+    await message.answer(f"Что показать?", reply_markup=Bot.show_card_menu.keyboard)
 
 
-@dp.message_handler(text=MainMenu.BTN_ADD)
-async def process_add_card_command(message: types.Message):
-    await AddCardForm.wait_side_1.set()
-    await message.answer("Введите первую сторону карточки")
+@dp.message_handler(text=ShowCardMenu.BTN_SHOW_SIDE_1)
+async def process_show_side_1_command(message: types.Message, state: FSMContext):
+    async with state.proxy() as data:
+        await bot.forward_message(message.chat.id, message.chat.id, data["side_1_id"])
+
+
+@dp.message_handler(text=ShowCardMenu.BTN_SHOW_SIDE_2)
+async def process_show_side_2_command(message: types.Message, state: FSMContext):
+    async with state.proxy() as data:
+        await bot.forward_message(message.chat.id, message.chat.id, data["side_2_id"])
+
+
+# TODO card list with management menu
