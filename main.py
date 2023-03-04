@@ -6,9 +6,9 @@ from asyncio import Future
 
 import uvloop
 
-from anki import AnkiMemApp
-from database import Database
-from tg_bot import AnkiMemBot
+from anki_bot import AnkiBot
+from anki_logic import AnkiApp
+from database import PgDatabase
 
 
 class AnkiMemoryApp:
@@ -17,14 +17,14 @@ class AnkiMemoryApp:
         self = AnkiMemoryApp()
         self.logger = logging.getLogger(__name__)
         self.logger.info("Starting AnkiMemory app")
-        self.database = await Database.create(
+        self.database = await PgDatabase.create(
             host=os.getenv("POSTGRES_HOST"),
             user=os.getenv("POSTGRES_USER"),
             password=os.getenv("POSTGRES_PASSWORD"),
             db_name=os.getenv("POSTGRES_DB"),
         )
-        self.anki = AnkiMemApp(self.database)
-        self.bot = await AnkiMemBot.create(self.anki)
+        self.anki = await AnkiApp.create(self.database)
+        self.bot = await AnkiBot.create(self.anki)
         self.logger.info("AnkiMemory telegram app")
         return self
 

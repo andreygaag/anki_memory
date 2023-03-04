@@ -1,5 +1,6 @@
 #cchardet - not compile for python3.11
 aiodns
+aiofiles
 aiogram
 aiohttp[speedups]
 asyncpg
