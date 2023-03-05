@@ -10,6 +10,7 @@ from aiogram.contrib.middlewares.logging import LoggingMiddleware
 from aiogram.dispatcher.middlewares import BaseMiddleware
 
 from anki_bot import aiogram_monkey
+from anki_bot.middlewares import OnlyCreatorCanLaunchMiddleware
 from anki_bot.middlewares import StateLoggingMiddleware
 from anki_bot.user_flows.create_card import CreateCardFlow
 from anki_bot.user_flows.create_deck import CreateDeckFlow
@@ -30,6 +31,7 @@ bot = Bot(os.getenv("TELEGRAM_BOT_TOKEN"))
 storage = MemoryStorage()
 dp = Dispatcher(bot, storage=storage)
 dp.middleware.setup(StateLoggingMiddleware())
+dp.middleware.setup(OnlyCreatorCanLaunchMiddleware())
 
 
 class AnkiBot:
