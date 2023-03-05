@@ -47,6 +47,7 @@ async def process_delete_card_confirmation(message: Message, state: FSMContext):
         await message.answer("Карточка удалена")
         await process_return_to_main_menu(message, state)
     elif message.text == ConfirmationMenu.BTN_NO:
+        await ShowCardForm.wait_card_action.set()
         await message.answer("Удаление отменено", reply_markup=ShowCardMenu().keyboard)
     else:
         await message.answer("Да или нет?")
