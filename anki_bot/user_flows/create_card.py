@@ -61,7 +61,7 @@ async def process_side_2(message: Message, state: FSMContext):
     async with state.proxy() as data:
         card: BotAnkiCard = data["created_card"]
         card.side_2_txt = message.text
-        card.side_2_img = message.photo.pop().file_unique_id if message.photo else None
+        card.side_2_img = message.photo.pop().file_id if message.photo else None
     await process_list_decks_command(message, state)
     await CreateCardForm.wait_deck_selection.set()
     async with state.proxy() as data:
