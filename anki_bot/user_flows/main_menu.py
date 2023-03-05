@@ -16,7 +16,7 @@ class MainMenuFlow:
             state="*",
         )
         dp.register_message_handler(
-            return_to_main_menu,
+            process_return_to_main_menu,
             text=MainMenu.BTN_MENU,
             state="*",
         )
@@ -30,7 +30,7 @@ async def process_start_command(message: Message, state: FSMContext):
     )
 
 
-async def return_to_main_menu(message: Message, state: FSMContext):
+async def process_return_to_main_menu(message: Message, state: FSMContext):
     await state.finish()
     await message.answer(
         "Выберите действие",

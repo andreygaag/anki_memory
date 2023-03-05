@@ -1,3 +1,5 @@
+import os
+
 import aiofiles
 from aiogram import Dispatcher
 from aiogram.dispatcher import FSMContext
@@ -5,7 +7,7 @@ from aiogram.types import Message
 
 from anki_bot.forms import ShowCardForm
 from anki_bot.models import BotAnkiCard
-from anki_bot.user_flows.main_menu import return_to_main_menu
+from anki_bot.user_flows.main_menu import process_return_to_main_menu
 from anki_bot.user_interface import MainMenu
 from anki_bot.user_interface import ShowCardMenu
 from anki_bot.utils import build_media_path
@@ -56,7 +58,8 @@ async def show_card_side(message: Message, card_txt, card_img, state: FSMContext
                 photo=await file.read(),
                 reply_markup=RandomCardFlow.show_card_menu.keyboard,
             )
-
+        # Удалить
+        os.remove(build_media_path(card_img))
     else:
         await message.answer(
             text=card_txt,
@@ -73,7 +76,7 @@ async def process_random_card_command(message: Message, state: FSMContext):
         await show_card_side(message, card.side_1_txt, card.side_1_img, state)
     else:
         await message.answer("Нет карточек")
-        await return_to_main_menu(message, state)
+        await process_return_to_main_menu(message, state)
 
 
 async def process_show_side_1_command(message: Message, state: FSMContext):

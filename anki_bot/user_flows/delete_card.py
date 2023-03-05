@@ -7,7 +7,7 @@ from aiogram.types import Message
 from anki_bot.forms import DeleteCardForm
 from anki_bot.forms import ShowCardForm
 from anki_bot.models import BotAnkiCard
-from anki_bot.user_flows.main_menu import return_to_main_menu
+from anki_bot.user_flows.main_menu import process_return_to_main_menu
 from anki_bot.user_interface import ConfirmationMenu
 from anki_bot.user_interface import ShowCardMenu
 from anki_logic import AnkiApp
@@ -45,7 +45,7 @@ async def process_delete_card_confirmation(message: Message, state: FSMContext):
     if message.text == ConfirmationMenu.BTN_YES:
         await DeleteCardFlow.anki.delete_card(card.card_id)
         await message.answer("Карточка удалена")
-        await return_to_main_menu(message, state)
+        await process_return_to_main_menu(message, state)
     elif message.text == ConfirmationMenu.BTN_NO:
         await message.answer("Удаление отменено", reply_markup=ShowCardMenu().keyboard)
     else:

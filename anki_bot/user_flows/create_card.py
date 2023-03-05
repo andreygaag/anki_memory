@@ -6,7 +6,7 @@ from aiogram.types import Message
 from anki_bot.forms import CreateCardForm
 from anki_bot.models import BotAnkiCard
 from anki_bot.user_flows.list_decks import process_list_decks_command
-from anki_bot.user_flows.main_menu import return_to_main_menu
+from anki_bot.user_flows.main_menu import process_return_to_main_menu
 from anki_bot.user_interface import MainMenu
 from anki_logic import AnkiApp
 
@@ -43,7 +43,7 @@ async def process_add_card_command(message: Message, state: FSMContext):
         await message.answer("Введите первую сторону карточки")
     else:
         await message.answer("У вас нет колод")
-        await return_to_main_menu(message, state)
+        await process_return_to_main_menu(message, state)
 
 
 async def process_side_1(message: Message, state: FSMContext):
@@ -75,7 +75,7 @@ async def process_deck_selection(message: Message, state: FSMContext):
             card.deck_id = deck_id
             await CreateCardFlow.anki.create_card(**card.dict())
             await message.answer(f"Карточка создана")
-            await return_to_main_menu(message, state)
+            await process_return_to_main_menu(message, state)
         else:
             await message.answer("Такой колоды нет")
             return
