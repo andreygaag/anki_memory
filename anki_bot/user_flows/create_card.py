@@ -36,6 +36,19 @@ class CreateCardFlow:
             state=CreateCardForm.wait_deck_selection,
         )
 
+        # Add handlers for other content types HERE
+
+        dp.register_message_handler(  # Strongly last, all other content types handler
+            process_wrong_content_type,
+            content_types=ContentTypes.ANY,
+            state=CreateCardForm.wait_side_1,
+        )
+        dp.register_message_handler(
+            process_wrong_content_type,
+            content_types=ContentTypes.ANY,
+            state=CreateCardForm.wait_side_2,
+        )
+
 
 async def process_add_card_command(message: Message, state: FSMContext):
     if await CreateCardFlow.anki.list_decks_names():
@@ -79,3 +92,8 @@ async def process_deck_selection(message: Message, state: FSMContext):
         else:
             await message.answer("Такой колоды нет")
             return
+
+
+async def process_wrong_content_type(message: Message, state: FSMContext):
+    await message.answer("Неверный формат сообщения")
+    await process_return_to_main_menu(message, state)
