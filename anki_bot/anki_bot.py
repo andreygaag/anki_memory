@@ -3,13 +3,9 @@ import os
 
 from aiogram import Bot
 from aiogram import Dispatcher
-from aiogram import executor
-from aiogram import types
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
-from aiogram.contrib.middlewares.logging import LoggingMiddleware
-from aiogram.dispatcher.middlewares import BaseMiddleware
 
-from anki_bot import aiogram_monkey
+from anki_bot.executor import start_polling_in_current_loop
 from anki_bot.middlewares import OnlyCreatorCanLaunchMiddleware
 from anki_bot.middlewares import StateLoggingMiddleware
 from anki_bot.user_flows.create_card import CreateCardFlow
@@ -39,10 +35,6 @@ class AnkiBot:
     async def create(cls, anki):
         self = cls()
 
-        # Monkey patch for run in current event loop
-        executor.Executor = aiogram_monkey.MyExecutor
-        executor.start_polling = aiogram_monkey.start_polling
-
         # Register handlers
         MainMenuFlow(dp)
         MenuDeckFlow(dp)
@@ -55,6 +47,6 @@ class AnkiBot:
         DeleteCardFlow(dp, anki)
 
         # Run handlers
-        await executor.start_polling(dp, skip_updates=True)
+        await start_polling_in_current_loop(dp, skip_updates=True)
         logging.info("Initializing TelegramBot")
         return self
