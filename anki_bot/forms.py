@@ -27,3 +27,7 @@ class ListDecksForm(StatesGroup):
 
 class DeleteDeckState(StatesGroup):
     wait_confirmation = State()
+
+
+class ShowDeckCardState(StatesGroup):
+    wait_card_action = State()

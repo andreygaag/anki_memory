@@ -1,5 +1,3 @@
-import abc
-
 from aiogram.types import InlineKeyboardButton
 from aiogram.types import KeyboardButton
 from aiogram.types import ReplyKeyboardMarkup
@@ -63,6 +61,7 @@ class ListDecksMenu(ReplyMarkup):
 
 class DeckActionsMenu(Keyboard):
     BTN_DELETE = "Удалить колоду"
+    BTN_SHOW_CARD = "Показать карточку"
     BTN_MENU = MainMenu.BTN_MENU
 
     def __init__(self):

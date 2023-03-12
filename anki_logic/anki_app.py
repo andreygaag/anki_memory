@@ -1,6 +1,4 @@
-import logging
 import random
-import time
 from typing import Optional
 
 from anki_logic.models import AnkiCard
@@ -22,6 +20,11 @@ class AnkiApp:
 
     async def next_card(self):
         return await self.random_card()
+
+    async def get_random_card_from_deck(self, deck_id: int) -> Optional[AnkiCard]:
+        # TODO: Optimisation, update show counter and last show time
+        cards = [card for card in self.cards.values() if card.deck_id == deck_id]
+        return random.choice(cards) if cards else None
 
     async def get_random_card(self) -> AnkiCard:
         all_cards = self.cards.values()

@@ -12,6 +12,7 @@ from anki_bot.user_flows.create_card import CreateCardFlow
 from anki_bot.user_flows.create_deck import CreateDeckFlow
 from anki_bot.user_flows.delete_card import DeleteCardFlow
 from anki_bot.user_flows.delete_deck import DeleteDeckFlow
+from anki_bot.user_flows.get_card_from_deck import GetCardFromDeckFlow
 from anki_bot.user_flows.get_deck import GetDeckFlow
 from anki_bot.user_flows.list_decks import ListDecksFlow
 from anki_bot.user_flows.main_menu import MainMenuFlow
@@ -45,6 +46,7 @@ class AnkiBot:
         CreateCardFlow(dp, anki)
         RandomCardFlow(dp, anki)
         DeleteCardFlow(dp, anki)
+        GetCardFromDeckFlow(dp, anki)
 
         # Run handlers
         await start_polling_in_current_loop(dp, skip_updates=True)

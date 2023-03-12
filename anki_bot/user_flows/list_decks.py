@@ -24,8 +24,10 @@ class ListDecksFlow:
 async def process_list_decks_command(message: Message, state: FSMContext):
     if decks_names := await ListDecksFlow.anki.list_decks_names():
         await ListDecksForm.list_decks.set()
-        menu = ListDecksMenu(decks_names)
-        await message.answer("Выберите колоду", reply_markup=menu.keyboard)
+        await message.answer(
+            "Выберите колоду",
+            reply_markup=ListDecksMenu(decks_names).keyboard,
+        )
     else:
         await state.finish()
         await message.answer("У вас нет колод")

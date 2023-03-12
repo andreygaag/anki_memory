@@ -6,6 +6,7 @@ from aiogram.types import Message
 
 from anki_bot.forms import DeleteCardForm
 from anki_bot.forms import ShowCardForm
+from anki_bot.forms import ShowDeckCardState
 from anki_bot.models import BotAnkiCard
 from anki_bot.user_flows.main_menu import process_return_to_main_menu
 from anki_bot.user_interface import ConfirmationMenu
@@ -23,6 +24,11 @@ class DeleteCardFlow:
             process_delete_card_command,
             text=ShowCardMenu.BTN_DELETE,
             state=ShowCardForm.wait_card_action,
+        )
+        dp.register_message_handler(
+            process_delete_card_command,
+            text=ShowCardMenu.BTN_DELETE,
+            state=ShowDeckCardState.wait_card_action,
         )
         dp.register_message_handler(
             process_delete_card_confirmation,

@@ -1,5 +1,6 @@
 import os
 
+import aiofiles
 from aiogram import Bot
 from aiogram.types import Message
 
@@ -25,3 +26,23 @@ async def check_and_download_message_photo(message: Message) -> str | None:
         await download_message_photo_by_message_id(message.bot, telegram_file_id)
         return telegram_file_id
     return None
+
+
+async def show_card_side(message: Message, card_txt, card_img, reply_markup):
+    if card_img:
+        # Скачать
+        await download_message_photo_by_message_id(message.bot, card_img)
+        async with aiofiles.open(build_media_path(card_img), "rb") as file:
+            # Отправить
+            await message.answer_photo(
+                caption=card_txt,
+                photo=await file.read(),
+                reply_markup=reply_markup,
+            )
+        # Удалить
+        os.remove(build_media_path(card_img))
+    else:
+        await message.answer(
+            text=card_txt,
+            reply_markup=reply_markup,
+        )
