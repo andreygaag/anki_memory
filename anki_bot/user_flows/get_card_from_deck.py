@@ -2,14 +2,12 @@ from aiogram import Dispatcher
 from aiogram.dispatcher import FSMContext
 from aiogram.types import Message
 
-from anki_bot.forms import DeleteDeckState
 from anki_bot.forms import ListDecksForm
 from anki_bot.forms import ShowDeckCardState
 from anki_bot.models import BotAnkiCard
 from anki_bot.user_flows.list_decks import process_list_decks_command
-from anki_bot.user_interface import ConfirmationMenu
 from anki_bot.user_interface import DeckActionsMenu
-from anki_bot.user_interface import ShowCardMenu
+from anki_bot.user_interface import ShowRandomDeckCardMenu
 from anki_bot.utils import show_card_side
 from anki_logic import AnkiApp
 
@@ -17,7 +15,7 @@ from anki_logic import AnkiApp
 class GetCardFromDeckFlow:
 
     anki: AnkiApp
-    show_card_menu = ShowCardMenu()
+    show_card_menu = ShowRandomDeckCardMenu()
 
     def __init__(self, dp: Dispatcher, anki: AnkiApp):
         GetCardFromDeckFlow.anki = anki
@@ -28,17 +26,17 @@ class GetCardFromDeckFlow:
         )
         dp.register_message_handler(
             process_get_card_from_deck,
-            text=ShowCardMenu.BTN_SHOW_NEXT_RANDOM,
+            text=ShowRandomDeckCardMenu.BTN_SHOW_NEXT_RANDOM,
             state=ShowDeckCardState.wait_card_action,
         )
         dp.register_message_handler(
             process_show_side_1_command,
-            text=ShowCardMenu.BTN_SHOW_SIDE_1,
+            text=ShowRandomDeckCardMenu.BTN_SHOW_SIDE_1,
             state=ShowDeckCardState.wait_card_action,
         )
         dp.register_message_handler(
             process_show_side_2_command,
-            text=ShowCardMenu.BTN_SHOW_SIDE_2,
+            text=ShowRandomDeckCardMenu.BTN_SHOW_SIDE_2,
             state=ShowDeckCardState.wait_card_action,
         )
 

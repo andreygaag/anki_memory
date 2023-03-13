@@ -5,12 +5,15 @@ from aiogram.dispatcher import FSMContext
 from aiogram.types import Message
 
 from anki_bot.forms import DeleteCardForm
-from anki_bot.forms import ShowCardForm
 from anki_bot.forms import ShowDeckCardState
+from anki_bot.forms import ShowNextCardForm
+from anki_bot.forms import ShowRandomCardForm
 from anki_bot.models import BotAnkiCard
 from anki_bot.user_flows.main_menu import process_return_to_main_menu
 from anki_bot.user_interface import ConfirmationMenu
-from anki_bot.user_interface import ShowCardMenu
+from anki_bot.user_interface import ShowNextCardMenu
+from anki_bot.user_interface import ShowRandomCardMenu
+from anki_bot.user_interface import ShowRandomDeckCardMenu
 from anki_logic import AnkiApp
 
 
@@ -22,13 +25,18 @@ class DeleteCardFlow:
         DeleteCardFlow.anki = anki
         dp.register_message_handler(
             process_delete_card_command,
-            text=ShowCardMenu.BTN_DELETE,
-            state=ShowCardForm.wait_card_action,
+            text=ShowRandomCardMenu.BTN_DELETE,
+            state=ShowRandomCardForm.wait_card_action,
         )
         dp.register_message_handler(
             process_delete_card_command,
-            text=ShowCardMenu.BTN_DELETE,
+            text=ShowRandomDeckCardMenu.BTN_DELETE,
             state=ShowDeckCardState.wait_card_action,
+        )
+        dp.register_message_handler(
+            process_delete_card_command,
+            text=ShowNextCardMenu.BTN_DELETE,
+            state=ShowNextCardForm.wait_card_action,
         )
         dp.register_message_handler(
             process_delete_card_confirmation,
@@ -53,7 +61,7 @@ async def process_delete_card_confirmation(message: Message, state: FSMContext):
         await message.answer("Карточка удалена")
         await process_return_to_main_menu(message, state)
     elif message.text == ConfirmationMenu.BTN_NO:
-        await ShowCardForm.wait_card_action.set()
-        await message.answer("Удаление отменено", reply_markup=ShowCardMenu().keyboard)
+        await message.answer("Удаление отменено")
+        await process_return_to_main_menu(message, state)
     else:
         await message.answer("Да или нет?")

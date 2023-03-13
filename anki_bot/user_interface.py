@@ -35,6 +35,7 @@ class MainMenu(Keyboard):
     BTN_RANDOM = "Случайная карточка"
     BTN_DECKS = "Управление колодами"
     BTN_MENU = "В главное меню"
+    BTN_NEXT = "Следующая карточка"
 
     def __init__(self):
         super().__init__()
@@ -80,12 +81,34 @@ class ConfirmationMenu(Keyboard):
 """ Cards """
 
 
-class ShowCardMenu(Keyboard):
+class ShowRandomDeckCardMenu(Keyboard):
     BTN_SHOW_SIDE_1 = "Показать сторону 1"
     BTN_SHOW_SIDE_2 = "Показать сторону 2"
-    BTN_SHOW_NEXT_RANDOM = "Следующая случайная карточка"
     BTN_DELETE = "Удалить карточку"
     BTN_MENU = MainMenu.BTN_MENU
+    BTN_SHOW_NEXT_RANDOM = "Следующая случайная карточка"
+
+    def __init__(self):
+        super().__init__()
+
+
+class ShowRandomCardMenu(Keyboard):
+    BTN_SHOW_SIDE_1 = "Показать сторону 1"
+    BTN_SHOW_SIDE_2 = "Показать сторону 2"
+    BTN_DELETE = "Удалить карточку"
+    BTN_MENU = MainMenu.BTN_MENU
+    BTN_SHOW_NEXT_RANDOM = "Следующая случайная карточка"
+
+    def __init__(self):
+        super().__init__()
+
+
+class ShowNextCardMenu(Keyboard):
+    BTN_SHOW_SIDE_1 = "Показать сторону 1"
+    BTN_SHOW_SIDE_2 = "Показать сторону 2"
+    BTN_DELETE = "Удалить карточку"
+    BTN_MENU = MainMenu.BTN_MENU
+    BTN_SHOW_NEXT = "Следующая карточка"
 
     def __init__(self):
         super().__init__()

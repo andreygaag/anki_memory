@@ -8,7 +8,11 @@ class CreateCardForm(StatesGroup):
     wait_deck_selection = State()
 
 
-class ShowCardForm(StatesGroup):
+class ShowRandomCardForm(StatesGroup):
+    wait_card_action = State()
+
+
+class ShowNextCardForm(StatesGroup):
     wait_card_action = State()
 
 

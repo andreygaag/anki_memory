@@ -1,14 +1,16 @@
+import logging
 import random
 from typing import Optional
 
 from anki_logic.models import AnkiCard
 from anki_logic.models import AnkiDeck
+from anki_logic.utils import update_show_time
 from database import PgDatabase
 
 
 class AnkiApp:
     db: PgDatabase
-    __slots__ = ("cards", "decks", "decks_by_name")
+    __slots__ = ("cards", "decks", "decks_by_name", "cards_sorted_by_show_time")
 
     @classmethod
     async def create(cls, db):
@@ -18,17 +20,25 @@ class AnkiApp:
         await self._refresh_decks()
         return self
 
-    async def next_card(self):
-        return await self.random_card()
-
+    @update_show_time
     async def get_random_card_from_deck(self, deck_id: int) -> Optional[AnkiCard]:
+        logging.info("Get random card from deck")
         # TODO: Optimisation, update show counter and last show time
         cards = [card for card in self.cards.values() if card.deck_id == deck_id]
         return random.choice(cards) if cards else None
 
+    @update_show_time
     async def get_random_card(self) -> AnkiCard:
+        logging.info("Get random card")
         all_cards = self.cards.values()
-        return random.choice(list(all_cards)) if all_cards else None
+        card = random.choice(list(all_cards)) if all_cards else None
+        return card
+
+    @update_show_time
+    async def get_next_card(self) -> AnkiCard:
+        logging.info("Get next card")
+        await self._sort_cards_by_show_time()
+        return self.cards_sorted_by_show_time[0]
 
     async def get_deck_by_name(self, name: str) -> Optional[AnkiDeck]:
         return self.decks_by_name.get(name)
@@ -60,14 +70,16 @@ class AnkiApp:
         await AnkiApp.db.delete_deck(deck_id)
         await self._refresh_decks()
 
-    async def update_card(self, card: AnkiCard):
-        await AnkiApp.db.update_card(card)
-
     async def update_deck(self, deck: AnkiDeck):
         raise NotImplemented
 
     async def _refresh_cards(self):
         self.cards = {card.card_id: card for card in await self.db.list_cards()}
+
+    async def _sort_cards_by_show_time(self):
+        self.cards_sorted_by_show_time = sorted(
+            self.cards.values(), key=lambda card: card.show_time
+        )
 
     async def _refresh_decks(self):
         self.decks = {deck.deck_id: deck for deck in await self.db.list_decks()}

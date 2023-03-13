@@ -94,16 +94,15 @@ class PgDatabase:
                     ),
                 )
 
-    async def update_card(self, card):
+    async def update_card_show_time(self, card):
         async with self.session() as session:
             async with session.begin():
-                update(AnkiCardsTable).where(AnkiCardsTable.id == card.id).values(
-                    side_1=card.side_1,
-                    side_2=card.side_2,
-                    yes=card.yes,
-                    no=card.no,
-                    show_time=None,
-                    create_time=int(time.time()),
+                await session.execute(
+                    update(AnkiCardsTable)
+                    .where(AnkiCardsTable.card_id == card.card_id)
+                    .values(
+                        show_time=card.show_time,
+                    ),
                 )
 
     async def delete_card(self, card_id: int):
