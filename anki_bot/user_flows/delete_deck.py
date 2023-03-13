@@ -2,8 +2,8 @@ from aiogram import Dispatcher
 from aiogram.dispatcher import FSMContext
 from aiogram.types import Message
 
-from anki_bot.forms import DeleteDeckState
-from anki_bot.forms import ListDecksForm
+from anki_bot.states import DeleteDeckState
+from anki_bot.states import ListDecksState
 from anki_bot.user_flows.list_decks import process_list_decks_command
 from anki_bot.user_interface import ConfirmationMenu
 from anki_bot.user_interface import DeckActionsMenu
@@ -19,7 +19,7 @@ class DeleteDeckFlow:
         DeleteDeckFlow.anki = anki
         dp.register_message_handler(
             process_delete_deck_command,
-            state=ListDecksForm.wait_deck_action,
+            state=ListDecksState.wait_deck_action,
             text=DeckActionsMenu.BTN_DELETE,
         )
         dp.register_message_handler(

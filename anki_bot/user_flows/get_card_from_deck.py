@@ -2,9 +2,9 @@ from aiogram import Dispatcher
 from aiogram.dispatcher import FSMContext
 from aiogram.types import Message
 
-from anki_bot.forms import ListDecksForm
-from anki_bot.forms import ShowDeckCardState
 from anki_bot.models import BotAnkiCard
+from anki_bot.states import ListDecksState
+from anki_bot.states import ShowDeckCardState
 from anki_bot.user_flows.list_decks import process_list_decks_command
 from anki_bot.user_interface import DeckActionsMenu
 from anki_bot.user_interface import ShowRandomDeckCardMenu
@@ -22,7 +22,7 @@ class GetCardFromDeckFlow:
         dp.register_message_handler(
             process_get_card_from_deck,
             text=DeckActionsMenu.BTN_SHOW_CARD,
-            state=ListDecksForm.wait_deck_action,
+            state=ListDecksState.wait_deck_action,
         )
         dp.register_message_handler(
             process_get_card_from_deck,

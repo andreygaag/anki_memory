@@ -4,11 +4,11 @@ from aiogram import Dispatcher
 from aiogram.dispatcher import FSMContext
 from aiogram.types import Message
 
-from anki_bot.forms import DeleteCardForm
-from anki_bot.forms import ShowDeckCardState
-from anki_bot.forms import ShowNextCardForm
-from anki_bot.forms import ShowRandomCardForm
 from anki_bot.models import BotAnkiCard
+from anki_bot.states import DeleteCardState
+from anki_bot.states import ShowDeckCardState
+from anki_bot.states import ShowNextCardState
+from anki_bot.states import ShowRandomCardState
 from anki_bot.user_flows.main_menu import process_return_to_main_menu
 from anki_bot.user_interface import ConfirmationMenu
 from anki_bot.user_interface import ShowNextCardMenu
@@ -26,7 +26,7 @@ class DeleteCardFlow:
         dp.register_message_handler(
             process_delete_card_command,
             text=ShowRandomCardMenu.BTN_DELETE,
-            state=ShowRandomCardForm.wait_card_action,
+            state=ShowRandomCardState.wait_card_action,
         )
         dp.register_message_handler(
             process_delete_card_command,
@@ -36,18 +36,18 @@ class DeleteCardFlow:
         dp.register_message_handler(
             process_delete_card_command,
             text=ShowNextCardMenu.BTN_DELETE,
-            state=ShowNextCardForm.wait_card_action,
+            state=ShowNextCardState.wait_card_action,
         )
         dp.register_message_handler(
             process_delete_card_confirmation,
-            state=DeleteCardForm.wait_confirmation,
+            state=DeleteCardState.wait_confirmation,
         )
 
 
 async def process_delete_card_command(message: Message, state: FSMContext):
     async with state.proxy() as data:
         card: BotAnkiCard = data["current_card"]
-    await DeleteCardForm.wait_confirmation.set()
+    await DeleteCardState.wait_confirmation.set()
     await message.answer("Точно удалить?", reply_markup=ConfirmationMenu().keyboard)
     async with state.proxy() as data:
         data["current_card"] = card

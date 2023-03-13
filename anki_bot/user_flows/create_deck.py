@@ -4,7 +4,7 @@ from aiogram import Dispatcher
 from aiogram.dispatcher import FSMContext
 from aiogram.types import Message
 
-from anki_bot.forms import CreateDeckForm
+from anki_bot.states import CreateDeckForm
 from anki_bot.user_interface import DecksMenu
 from anki_logic import AnkiApp
 

@@ -2,7 +2,7 @@ from aiogram import Dispatcher
 from aiogram.dispatcher import FSMContext
 from aiogram.types import Message
 
-from anki_bot.forms import ListDecksForm
+from anki_bot.states import ListDecksState
 from anki_bot.user_flows.menu_deck import process_deck_menu_command
 from anki_bot.user_interface import DecksMenu
 from anki_bot.user_interface import ListDecksMenu
@@ -23,7 +23,7 @@ class ListDecksFlow:
 
 async def process_list_decks_command(message: Message, state: FSMContext):
     if decks_names := await ListDecksFlow.anki.list_decks_names():
-        await ListDecksForm.list_decks.set()
+        await ListDecksState.list_decks.set()
         await message.answer(
             "Выберите колоду",
             reply_markup=ListDecksMenu(decks_names).keyboard,

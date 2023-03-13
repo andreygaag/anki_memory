@@ -2,8 +2,8 @@ from aiogram import Dispatcher
 from aiogram.dispatcher import FSMContext
 from aiogram.types import Message
 
-from anki_bot.forms import ShowNextCardForm
 from anki_bot.models import BotAnkiCard
+from anki_bot.states import ShowNextCardState
 from anki_bot.user_flows.main_menu import process_return_to_main_menu
 from anki_bot.user_interface import MainMenu
 from anki_bot.user_interface import ShowNextCardMenu
@@ -29,22 +29,22 @@ class NextCardFlow:
         dp.register_message_handler(
             process_next_card_command,
             text=ShowNextCardMenu.BTN_SHOW_NEXT,
-            state=ShowNextCardForm.wait_card_action,
+            state=ShowNextCardState.wait_card_action,
         )
         dp.register_message_handler(
             process_show_side_1_command,
             text=ShowNextCardMenu.BTN_SHOW_SIDE_1,
-            state=ShowNextCardForm.wait_card_action,
+            state=ShowNextCardState.wait_card_action,
         )
         dp.register_message_handler(
             process_show_side_2_command,
             text=ShowNextCardMenu.BTN_SHOW_SIDE_2,
-            state=ShowNextCardForm.wait_card_action,
+            state=ShowNextCardState.wait_card_action,
         )
 
 
 async def process_next_card_command(message: Message, state: FSMContext):
-    await ShowNextCardForm.wait_card_action.set()
+    await ShowNextCardState.wait_card_action.set()
     if card := await NextCardFlow.anki.get_next_card():
         async with state.proxy() as data:
             data["current_card"] = card

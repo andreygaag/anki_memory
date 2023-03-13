@@ -2,8 +2,8 @@ from aiogram import Dispatcher
 from aiogram.dispatcher import FSMContext
 from aiogram.types import Message
 
-from anki_bot.forms import ShowRandomCardForm
 from anki_bot.models import BotAnkiCard
+from anki_bot.states import ShowRandomCardState
 from anki_bot.user_flows.main_menu import process_return_to_main_menu
 from anki_bot.user_interface import MainMenu
 from anki_bot.user_interface import ShowRandomCardMenu
@@ -29,22 +29,22 @@ class RandomCardFlow:
         dp.register_message_handler(
             process_random_card_command,
             text=ShowRandomCardMenu.BTN_SHOW_NEXT_RANDOM,
-            state=ShowRandomCardForm.wait_card_action,
+            state=ShowRandomCardState.wait_card_action,
         )
         dp.register_message_handler(
             process_show_side_1_command,
             text=ShowRandomCardMenu.BTN_SHOW_SIDE_1,
-            state=ShowRandomCardForm.wait_card_action,
+            state=ShowRandomCardState.wait_card_action,
         )
         dp.register_message_handler(
             process_show_side_2_command,
             text=ShowRandomCardMenu.BTN_SHOW_SIDE_2,
-            state=ShowRandomCardForm.wait_card_action,
+            state=ShowRandomCardState.wait_card_action,
         )
 
 
 async def process_random_card_command(message: Message, state: FSMContext):
-    await ShowRandomCardForm.wait_card_action.set()
+    await ShowRandomCardState.wait_card_action.set()
     if card := await RandomCardFlow.anki.get_random_card():
         async with state.proxy() as data:
             data["current_card"] = card
