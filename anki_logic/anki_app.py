@@ -1,16 +1,34 @@
 import logging
 import random
+from typing import KeysView
+from typing import Mapping
 from typing import Optional
+from typing import TypeAlias
 
 from anki_logic.models import AnkiCard
 from anki_logic.models import AnkiDeck
 from anki_logic.utils import update_show_time
 from database import PgDatabase
 
+CardIdToCard: TypeAlias = Mapping[int, AnkiCard]
+DeckIdToDeck: TypeAlias = Mapping[int, AnkiDeck]
+DeckNameToDeck: TypeAlias = Mapping[str, AnkiDeck]
+
 
 class AnkiApp:
     db: PgDatabase
-    __slots__ = ("cards", "decks", "decks_by_name", "cards_sorted_by_show_time")
+    __slots__ = (
+        "cards_by_id",
+        "decks_by_id",
+        "decks_by_name",
+        "cards_sorted_by_show_time",
+    )
+
+    def __init__(self):
+        self.cards_by_id: CardIdToCard = {}
+        self.cards_sorted_by_show_time: list[AnkiCard]
+        self.decks_by_id: DeckIdToDeck = {}
+        self.decks_by_name: DeckNameToDeck = {}
 
     @classmethod
     async def create(cls, db):
@@ -24,13 +42,13 @@ class AnkiApp:
     async def get_random_card_from_deck(self, deck_id: int) -> Optional[AnkiCard]:
         logging.info("Get random card from deck")
         # TODO: Optimisation, update show counter and last show time
-        cards = [card for card in self.cards.values() if card.deck_id == deck_id]
+        cards = [card for card in self.cards_by_id.values() if card.deck_id == deck_id]
         return random.choice(cards) if cards else None
 
     @update_show_time
-    async def get_random_card(self) -> AnkiCard:
+    async def get_random_card(self) -> Optional[AnkiCard]:
         logging.info("Get random card")
-        all_cards = self.cards.values()
+        all_cards = self.cards_by_id.values()
         card = random.choice(list(all_cards)) if all_cards else None
         return card
 
@@ -47,10 +65,7 @@ class AnkiApp:
         deck = await self.get_deck_by_name(name)
         return deck.deck_id if deck else None
 
-    async def list_decks(self) -> dict[int, AnkiDeck]:
-        return self.decks
-
-    async def list_decks_names(self) -> list[str]:
+    async def list_decks_names(self) -> KeysView[str]:
         return self.decks_by_name.keys()
 
     async def create_card(self, **kwargs):
@@ -74,13 +89,19 @@ class AnkiApp:
         raise NotImplemented
 
     async def _refresh_cards(self):
-        self.cards = {card.card_id: card for card in await self.db.list_cards()}
+        self.cards_by_id = {
+            card.card_id: AnkiCard(**card.__dict__)
+            for card in await self.db.list_cards()
+        }
 
     async def _sort_cards_by_show_time(self):
         self.cards_sorted_by_show_time = sorted(
-            self.cards.values(), key=lambda card: card.show_time
+            self.cards_by_id.values(), key=lambda card: card.show_time
         )
 
     async def _refresh_decks(self):
-        self.decks = {deck.deck_id: deck for deck in await self.db.list_decks()}
-        self.decks_by_name = {deck.name: deck for deck in self.decks.values()}
+        self.decks_by_id = {
+            deck.deck_id: AnkiDeck(**deck.__dict__)
+            for deck in await self.db.list_decks()
+        }
+        self.decks_by_name = {deck.name: deck for deck in self.decks_by_id.values()}
